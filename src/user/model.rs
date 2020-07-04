@@ -79,6 +79,26 @@ impl User {
         Ok(user)
     }
 
+    pub fn find_by_email(email: string) -> Result<Self, ApiError> {
+        let conn = db::connection()?;
+
+        let user = user::table
+            .filter(user::email.eq(email))
+            .first(&conn)?;
+
+        Ok(user)
+    }
+
+    pub fn find_by_handle(handle: string) -> Result<Self, ApiError> {
+        let conn = db::connection()?;
+
+        let user = user::table
+            .filter(user::handle.eq(handle))
+            .first(&conn)?;
+
+        Ok(user)
+    }
+
     pub fn hash_password(&mut self) -> Result<(), ApiError> {
         let salt: [u8; 32] = rand::thread_rng().gen();
         let config = Config::default();

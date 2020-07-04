@@ -4,6 +4,7 @@ use diesel::result::Error as DieselError;
 use serder::Deserialize;
 use serde_json::json;
 use std::fmt;
+use actix_web::error::Error as ActixError;
 
 #[derive(Debug, Deserialize)]
 pub struct ApiError {
@@ -30,6 +31,12 @@ impl From<DieselError> for ApiError {
             DieselError::NotFound => ApiError::new(404, "Record not found".to_string()),
             err => ApiError::new(500, format!("Diesel error: {}", err)),
         }
+    }
+}
+
+impl From<ActixError> for ApiError {
+    fn from(error: ActixError) -> ApiError {
+        ApiError::new(500, error.to_string())
     }
 }
 
