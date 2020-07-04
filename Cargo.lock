@@ -1633,6 +1633,8 @@ dependencies = [
  "env_logger",
  "listenfd",
  "log",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
