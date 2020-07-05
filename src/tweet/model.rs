@@ -7,6 +7,7 @@ use crate::db;
 #[table_name = "tweet"]
 pub struct TweetMessage {
     pub content: String,
+    pub handle: String,
 }
 
 #[derive(Serialize, Deserialize, Queryable, Insertable)]
@@ -14,6 +15,7 @@ pub struct TweetMessage {
 pub struct Tweet {
     pub id: Uuid,
     pub content: String,
+    pub handle: String,
     pub created_at: NaiveDateTime,
     pub updated_at: Option<NaiveDateTime>,
 }
@@ -63,6 +65,14 @@ impl Tweet {
 
         Ok(tweet)
     }
+
+    pub fn find_tweets_by_user(handle: String) -> Result<Self, ApiError> {
+        let conn = db::connection()?;
+        let tweets = tweet::table.filter(tweet::handle.eq(handle)).load::<Tweet>(&conn)?;
+
+        Ok(tweets)
+    }
+    
 }
 
 impl From<UserMessage> for Tweet {
@@ -70,6 +80,7 @@ impl From<UserMessage> for Tweet {
         Tweet {
             id: Uuid::new_v4(),
             content: tweet.content,
+            handle: tweet.handle,
             created_at: Utc::now().naive_utc(),
             updated_at: None,
         }

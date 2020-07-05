@@ -10,16 +10,22 @@ async fn find_all() -> Result<HttpResponse, ApiError> {
     Ok(HttpResponse::Ok().json(tweets))
 }
 
-#[get("tweets/{id}")]
+#[get("/tweets/single/{id}")]
 async fn find(id: web::Path::<Uuid>) -> Result<HttpResponse, ApiError> {
     let tweet = Tweet::find(id.into_inner())?;
     Ok(HttpResponse::Ok().json(tweet))
 }
 
 #[post("/tweets")]
-async fn create(user: web::Json<UserMessage>) -> Result<HttpResponse, ApiError> {
+async fn create(tweet: web::Json<TweetMessage>) -> Result<HttpResponse, ApiError> {
     let tweet = Tweet::create(tweet.into_inner())?;
     Ok(HttpResponse::Ok().json(tweet))
+}
+
+#[get("/tweets/user/{username}}")]
+async fn tweets_by_user(handle: web::Path::<String>) -> Result<HttpResponse, ApiError> {
+    let tweets = Tweet::find_tweets_by_user(handle);
+    Ok(HttpResponse::Ok().json(tweets))
 }
 
 #[put("/tweets/{id}")]
