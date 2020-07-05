@@ -1,6 +1,6 @@
 use crate::api_error::ApiError;
 use crate::user::{User, UserMessage};
-use actix_web::{post, web, HttpResponse};
+use actix_web::{post, get, web, HttpResponse};
 use uuid::Uuid;
 use serde_json::json;
 use actix_session::Session;
@@ -48,8 +48,21 @@ async fn register(user: web::Json<UserMessage>) -> Result<HttpResponse, ApiError
     Ok(HttpResponse::Ok().json(user))
 }
 
+#[get("/me")]
+async fn me(session: Session) -> Result<HttpResponse,ApiError> {
+    let id: Option<Uuid> = session.get("user_id")?;
+    if let Some(id) = id {
+        let user = User::find(id)?;
+        Ok(HttpResponse::Ok().json(user))
+    }
+    else {
+        Err(ApiError::new(401, "Unauthorized".to_string()))
+    }
+}
+
 pub fn init_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(register);
     cfg.service(login);
     cfg.service(logout);
+    cfg.service(me)
 }
