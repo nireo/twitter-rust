@@ -1,4 +1,4 @@
-use craete::api_error::ApiError;
+use crate::api_error::ApiError;
 use crate::tweet::{Tweet, TweetMessage};
 use actix_web::{delete, get, post, put, web, HttpResponse};
 use serde_json::json;
@@ -20,12 +20,6 @@ async fn find(id: web::Path::<Uuid>) -> Result<HttpResponse, ApiError> {
 async fn create(tweet: web::Json<TweetMessage>) -> Result<HttpResponse, ApiError> {
     let tweet = Tweet::create(tweet.into_inner())?;
     Ok(HttpResponse::Ok().json(tweet))
-}
-
-#[get("/tweets/user/{username}}")]
-async fn tweets_by_user(handle: web::Path::<String>) -> Result<HttpResponse, ApiError> {
-    let tweets = Tweet::find_tweets_by_user(handle);
-    Ok(HttpResponse::Ok().json(tweets))
 }
 
 #[put("/tweets/{id}")]

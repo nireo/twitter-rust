@@ -16,6 +16,7 @@ mod api_error;
 mod db;
 mod schema;
 mod auth;
+mod tweet;
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
@@ -32,6 +33,8 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(RedisSession::new(format!("{}:{}", redis_host, redis_port), &[0; 32]))
             .configure(auth::init_routes)
+            .configure(tweet::init_routes)
+            .configure(user::init_routes)
     );
 
     server = match listenfd.take_tcp_listener(0)? {

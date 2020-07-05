@@ -1,12 +1,12 @@
 use crate::api_error::ApiError;
 use crate::db;
 use crate::schema::user;
+use argon2::Config;
 use chrono::{NaiveDateTime, Utc};
 use diesel::prelude::*;
+use rand::Rng;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use argon2::Config;
-use rand::Rng;
 
 #[derive(Serialize, Deserialize, AsChangeset)]
 #[table_name = "user"]
@@ -32,8 +32,7 @@ impl User {
     pub fn find_all() -> Result<Vec<Self>, ApiError> {
         let conn = db::connection()?;
 
-        let users = user::table
-            .load::<User>(&conn)?;
+        let users = user::table.load::<User>(&conn)?;
 
         Ok(users)
     }
@@ -41,9 +40,7 @@ impl User {
     pub fn find(id: Uuid) -> Result<Self, ApiError> {
         let conn = db::connection()?;
 
-        let user = user::table
-            .filter(user::id.eq(id))
-            .first(&conn)?;
+        let user = user::table.filter(user::id.eq(id)).first(&conn)?;
 
         Ok(user)
     }
@@ -82,9 +79,7 @@ impl User {
     pub fn find_by_email(email: String) -> Result<Self, ApiError> {
         let conn = db::connection()?;
 
-        let user = user::table
-            .filter(user::email.eq(email))
-            .first(&conn)?;
+        let user = user::table.filter(user::email.eq(email)).first(&conn)?;
 
         Ok(user)
     }
@@ -92,9 +87,7 @@ impl User {
     pub fn find_by_handle(handle: String) -> Result<Self, ApiError> {
         let conn = db::connection()?;
 
-        let user = user::table
-            .filter(user::handle.eq(handle))
-            .first(&conn)?;
+        let user = user::table.filter(user::handle.eq(handle)).first(&conn)?;
 
         Ok(user)
     }
@@ -127,4 +120,3 @@ impl From<UserMessage> for User {
         }
     }
 }
-

@@ -64,5 +64,5 @@ pub fn init_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(register);
     cfg.service(login);
     cfg.service(logout);
-    cfg.service(me)
+    cfg.service(me);
 }

@@ -1,10 +1,10 @@
+use actix_web::error::Error as ActixError;
 use actix_web::http::StatusCode;
 use actix_web::{HttpResponse, ResponseError};
 use diesel::result::Error as DieselError;
 use serde::Deserialize;
 use serde_json::json;
 use std::fmt;
-use actix_web::error::Error as ActixError;
 
 #[derive(Debug, Deserialize)]
 pub struct ApiError {
@@ -14,7 +14,10 @@ pub struct ApiError {
 
 impl ApiError {
     pub fn new(status_code: u16, message: String) -> ApiError {
-        ApiError { status_code, message }
+        ApiError {
+            status_code,
+            message,
+        }
     }
 }
 
@@ -52,10 +55,9 @@ impl ResponseError for ApiError {
             false => {
                 error!("{}", self.message);
                 "Internal server error".to_string()
-            },
+            }
         };
 
-        HttpResponse::build(status_code)
-            .json(json!({ "message": message }))
+        HttpResponse::build(status_code).json(json!({ "message": message }))
     }
 }

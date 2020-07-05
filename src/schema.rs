@@ -2,6 +2,7 @@ table! {
     tweet (id) {
         id -> Uuid,
         content -> Text,
+        handle -> Text,
         created_at -> Timestamp,
         updated_at -> Nullable<Timestamp>,
     }
@@ -18,7 +19,4 @@ table! {
     }
 }
 
-allow_tables_to_appear_in_same_query!(
-    tweet,
-    user,
-);
+allow_tables_to_appear_in_same_query!(tweet, user,);

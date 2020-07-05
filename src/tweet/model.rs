@@ -1,7 +1,10 @@
+use crate::api_error::ApiError;
+use crate::db;
+use crate::schema::tweet;
+use chrono::{NaiveDateTime, Utc};
+use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use chrono::{NaiveDateTime};
-use crate::db;
 
 #[derive(Serialize, Deserialize, AsChangeset)]
 #[table_name = "tweet"]
@@ -30,9 +33,7 @@ impl Tweet {
 
     pub fn find(id: Uuid) -> Result<Self, ApiError> {
         let conn = db::connection()?;
-        let tweet = tweet::table
-            .filter(tweet::id.eq(id))
-            .first(&conn)?;
+        let tweet = tweet::table.filter(tweet::id.eq(id)).first(&conn)?;
 
         Ok(tweet)
     }
@@ -41,9 +42,9 @@ impl Tweet {
         let conn = db::connection()?;
 
         let tweet = Tweet::from(tweet);
-        let tweet = diesel::insert_into(user::table)
+        let tweet = diesel::insert_into(tweet::table)
             .values(tweet)
-            .get_results(&conn)?;
+            .get_result(&conn)?;
 
         Ok(tweet)
     }
@@ -68,14 +69,15 @@ impl Tweet {
 
     pub fn find_tweets_by_user(handle: String) -> Result<Self, ApiError> {
         let conn = db::connection()?;
-        let tweets = tweet::table.filter(tweet::handle.eq(handle)).load::<Tweet>(&conn)?;
+        let tweets = tweet::table
+            .filter(tweet::handle.eq(handle))
+            .get_result(&conn)?;
 
         Ok(tweets)
     }
-    
 }
 
-impl From<UserMessage> for Tweet {
+impl From<TweetMessage> for Tweet {
     fn from(tweet: TweetMessage) -> Self {
         Tweet {
             id: Uuid::new_v4(),
