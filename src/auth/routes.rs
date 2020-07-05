@@ -1,6 +1,6 @@
 use crate::api_error::ApiError;
 use crate::user::{User, UserMessage};
-use actix_web::{post, get, web, HttpResponse};
+use actix_web::{post, web, HttpResponse};
 use uuid::Uuid;
 use serde_json::json;
 use actix_session::Session;
@@ -43,7 +43,7 @@ async fn logout(session: Session) -> Result<HttpResponse, ApiError> {
 }
 
 #[post("/register")]
-async fn register(user: web::Json<Username>) -> Result<HttpResponse, ApiError> {
+async fn register(user: web::Json<UserMessage>) -> Result<HttpResponse, ApiError> {
     let user = User::create(user.into_inner())?;
     Ok(HttpResponse::Ok().json(user))
 }

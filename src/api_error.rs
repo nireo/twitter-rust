@@ -1,7 +1,7 @@
 use actix_web::http::StatusCode;
 use actix_web::{HttpResponse, ResponseError};
 use diesel::result::Error as DieselError;
-use serder::Deserialize;
+use serde::Deserialize;
 use serde_json::json;
 use std::fmt;
 use actix_web::error::Error as ActixError;

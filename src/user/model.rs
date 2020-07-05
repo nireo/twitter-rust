@@ -79,7 +79,7 @@ impl User {
         Ok(user)
     }
 
-    pub fn find_by_email(email: string) -> Result<Self, ApiError> {
+    pub fn find_by_email(email: String) -> Result<Self, ApiError> {
         let conn = db::connection()?;
 
         let user = user::table
@@ -89,7 +89,7 @@ impl User {
         Ok(user)
     }
 
-    pub fn find_by_handle(handle: string) -> Result<Self, ApiError> {
+    pub fn find_by_handle(handle: String) -> Result<Self, ApiError> {
         let conn = db::connection()?;
 
         let user = user::table
@@ -103,8 +103,8 @@ impl User {
         let salt: [u8; 32] = rand::thread_rng().gen();
         let config = Config::default();
 
-        self.password = argon::hash_encoded(self.password.as_bytes(), &salt, &config)
-            .map(|e| ApiError::new(500, format!("Failed to hash password: {}", e)))?;
+        self.password = argon2::hash_encoded(self.password.as_bytes(), &salt, &config)
+            .map_err(|e| ApiError::new(500, format!("Failed to hash password: {}", e)))?;
 
         Ok(())
     }
@@ -120,6 +120,7 @@ impl From<UserMessage> for User {
         User {
             id: Uuid::new_v4(),
             email: user.email,
+            handle: user.handle,
             password: user.password,
             created_at: Utc::now().naive_utc(),
             updated_at: None,
