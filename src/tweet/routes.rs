@@ -3,6 +3,7 @@ use crate::tweet::{Tweet, TweetMessage};
 use actix_web::{delete, get, post, put, web, HttpResponse};
 use serde_json::json;
 use uuid::Uuid;
+use actix_session::Session;
 
 #[get("/tweets")]
 async fn find_all() -> Result<HttpResponse, ApiError> {
@@ -17,9 +18,15 @@ async fn find(id: web::Path::<Uuid>) -> Result<HttpResponse, ApiError> {
 }
 
 #[post("/tweets")]
-async fn create(tweet: web::Json<TweetMessage>) -> Result<HttpResponse, ApiError> {
-    let tweet = Tweet::create(tweet.into_inner())?;
-    Ok(HttpResponse::Ok().json(tweet))
+async fn create(tweet: web::Json<TweetMessage>, session: Session) -> Result<HttpResponse, ApiError> {
+    let id: Option<Uuid> = session.get("user_id")?;
+    if let Some(_) = id {
+        let tweet = Tweet::create(tweet.into_inner())?;
+        Ok(HttpResponse::Ok().json(tweet))
+    }
+    else {
+        Err(ApiError::new(401, "Unauthorized".to_string()))
+    }
 }
 
 #[put("/tweets/{id}")]

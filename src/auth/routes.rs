@@ -9,7 +9,7 @@ use actix_session::Session;
 async fn login(credentials: web::Json<UserMessage>, session: Session) -> Result<HttpResponse, ApiError> {
     let credentials = credentials.into_inner();
 
-    let user = User::find_by_email(credentials.email)
+    let user = User::find_by_handle(credentials.handle)
         .map_err(|e| {
             match e.status_code {
                 404 => ApiError::new(401, "Credentials not valid".to_string()),
