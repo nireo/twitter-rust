@@ -5,7 +5,7 @@ use uuid::Uuid;
 use serde_json::json;
 use actix_session::Session;
 
-#[post("login")]
+#[post("/auth/login")]
 async fn login(credentials: web::Json<UserMessage>, session: Session) -> Result<HttpResponse, ApiError> {
     let credentials = credentials.into_inner();
 
@@ -30,7 +30,7 @@ async fn login(credentials: web::Json<UserMessage>, session: Session) -> Result<
     }
 }
 
-#[post("logout")]
+#[post("/auth/logout")]
 async fn logout(session: Session) -> Result<HttpResponse, ApiError> {
     let id: Option<Uuid> = session.get("user_id")?;
     if let Some(_) = id {
@@ -42,13 +42,13 @@ async fn logout(session: Session) -> Result<HttpResponse, ApiError> {
     }
 }
 
-#[post("/register")]
+#[post("/auth/register")]
 async fn register(user: web::Json<UserMessage>) -> Result<HttpResponse, ApiError> {
     let user = User::create(user.into_inner())?;
     Ok(HttpResponse::Ok().json(user))
 }
 
-#[get("/me")]
+#[get("/auth/me")]
 async fn me(session: Session) -> Result<HttpResponse,ApiError> {
     let id: Option<Uuid> = session.get("user_id")?;
     if let Some(id) = id {

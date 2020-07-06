@@ -5,6 +5,7 @@ use chrono::{NaiveDateTime, Utc};
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use diesel::sql_query;
 
 #[derive(Serialize, Deserialize, AsChangeset)]
 #[table_name = "tweet"]
@@ -69,9 +70,7 @@ impl Tweet {
 
     pub fn find_tweets_by_user(handle: String) -> Result<Self, ApiError> {
         let conn = db::connection()?;
-        let tweets = tweet::table
-            .filter(tweet::handle.eq(handle))
-            .get_result(&conn)?;
+        let tweets = sql_query(format!("SELECT * FROM tweets WHERE handle={}", handle)).load(&conn)
 
         Ok(tweets)
     }
