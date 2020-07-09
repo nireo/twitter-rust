@@ -47,8 +47,14 @@ async fn update(
     let session_id: Option<Uuid> = session.get("user_id")?;
 
     if let Some(_) = session_id {
-        let tweet = Tweet::update(id.into_inner(), tweet.into_inner())?;
-        Ok(HttpResponse::Ok().json(tweet))
+        let user = User::find(session_id.unwrap())?;
+        let existing_tweet = Tweet::find(id.into_inner())?;
+        if user.handle != existing_tweet.handle {
+            Err(ApiError::new(401, "Unauthorized".to_string()));
+        }
+
+        existing_tweet.update_self(tweet.into_inner())?;
+        Ok(HttpResponse::Ok().json(existing_tweet))
     } else {
         Err(ApiError::new(401, "Unauthorized".to_string()))
     }
