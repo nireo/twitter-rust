@@ -67,14 +67,13 @@ impl Tweet {
         Ok(tweet)
     }
 
-    /*
-    pub fn find_tweets_by_user(handle: String) -> Result<Self, ApiError> {
+    pub fn tweets_with_handle(handleSearch: String) -> Result<Self, ApiError> {
         let conn = db::connection()?;
-        let tweets = tweet::table.filter(tweet::handle.eq(handle)).load::<Tweet>(&conn)?
 
-        Ok(tweets)
+        let tweets = tweet::table
+            .filter(tweet::handle.eq(handleSearch))
+            .load::<Tweet>(&conn)?;
     }
-    */
 }
 
 impl From<TweetMessage> for Tweet {

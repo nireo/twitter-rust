@@ -17,6 +17,12 @@ async fn find(id: web::Path::<Uuid>) -> Result<HttpResponse, ApiError> {
     Ok(HttpResponse::Ok().json(tweet))
 }
 
+#[get("/tweets/{handle}")]
+async fn find_handle(handle: web::Path<String>) -> Result<HttpResponse, ApiError> {
+    let tweets = Tweet::tweets_with_handle(handle.into_inner());
+    Ok(HttpResponse::Ok().json(tweets))
+}
+
 #[post("/tweets")]
 async fn create(tweet: web::Json<TweetMessage>, session: Session) -> Result<HttpResponse, ApiError> {
     let id: Option<Uuid> = session.get("user_id")?;
@@ -31,9 +37,9 @@ async fn create(tweet: web::Json<TweetMessage>, session: Session) -> Result<Http
 
 #[put("/tweets/{id}")]
 async fn update(id: web::Path<Uuid>, user: web::Json<TweetMessage>, session: Session) -> Result<HttpResponse, ApiError> {
-    let sessionId: Option<Uuid> = session.get("user_id")?;
+    let session_id: Option<Uuid> = session.get("user_id")?;
 
-    if let Some(_) = sessionId {
+    if let Some(_) = session_id {
         let tweet = Tweet::update(id.into_inner(), user.into_inner())?;
         Ok(HttpResponse::Ok().json(tweet))
     }
@@ -44,15 +50,15 @@ async fn update(id: web::Path<Uuid>, user: web::Json<TweetMessage>, session: Ses
 
 #[delete("/tweets/{id}}")]
 async fn delete(id: web::Path<Uuid>, session: Session) -> Result<HttpResponse, ApiError> {
-    let sessionId: Option<Uuid> = session.get("user_id")?;
+    let session_id: Option<Uuid> = session.get("user_id")?;
 
 
-    if let Some(_) = sessionId {
+    if let Some(_) = session_id {
         let num_deleted = Tweet::delete(id.into_inner())?;
         Ok(HttpResponse::Ok().json(json!({ "deleted": num_deleted })))
     } 
     else {
-        Err(ApiError::new(401, "Unauthrized".to_string()))
+        Err(ApiError::new(401, "Unauthorized".to_string()))
     }
 }
 

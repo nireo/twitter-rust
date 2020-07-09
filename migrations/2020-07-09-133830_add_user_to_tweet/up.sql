@@ -1,0 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+ALTER TABLE tweet ADD COLUMN user_id UUID NOT NULL;
+ALTER TABLE tweet ADD CONSTRAINT tweet_user_id_foreign_key
+FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE;
