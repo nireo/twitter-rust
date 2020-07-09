@@ -1,9 +1,10 @@
 use crate::api_error::ApiError;
 use crate::tweet::{Tweet, TweetMessage};
+use crate::user::User;
+use actix_session::Session;
 use actix_web::{delete, get, post, put, web, HttpResponse};
 use serde_json::json;
 use uuid::Uuid;
-use actix_session::Session;
 
 #[get("/tweets")]
 async fn find_all() -> Result<HttpResponse, ApiError> {
@@ -12,7 +13,7 @@ async fn find_all() -> Result<HttpResponse, ApiError> {
 }
 
 #[get("/tweets/single/{id}")]
-async fn find(id: web::Path::<Uuid>) -> Result<HttpResponse, ApiError> {
+async fn find(id: web::Path<Uuid>) -> Result<HttpResponse, ApiError> {
     let tweet = Tweet::find(id.into_inner())?;
     Ok(HttpResponse::Ok().json(tweet))
 }
@@ -24,26 +25,31 @@ async fn find_handle(handle: web::Path<String>) -> Result<HttpResponse, ApiError
 }
 
 #[post("/tweets")]
-async fn create(tweet: web::Json<TweetMessage>, session: Session) -> Result<HttpResponse, ApiError> {
+async fn create(
+    tweet: web::Json<TweetMessage>,
+    session: Session,
+) -> Result<HttpResponse, ApiError> {
     let id: Option<Uuid> = session.get("user_id")?;
     if let Some(_) = id {
         let tweet = Tweet::create(tweet.into_inner())?;
         Ok(HttpResponse::Ok().json(tweet))
-    }
-    else {
+    } else {
         Err(ApiError::new(401, "Unauthorized".to_string()))
     }
 }
 
 #[put("/tweets/{id}")]
-async fn update(id: web::Path<Uuid>, user: web::Json<TweetMessage>, session: Session) -> Result<HttpResponse, ApiError> {
+async fn update(
+    id: web::Path<Uuid>,
+    tweet: web::Json<TweetMessage>,
+    session: Session,
+) -> Result<HttpResponse, ApiError> {
     let session_id: Option<Uuid> = session.get("user_id")?;
 
     if let Some(_) = session_id {
-        let tweet = Tweet::update(id.into_inner(), user.into_inner())?;
+        let tweet = Tweet::update(id.into_inner(), tweet.into_inner())?;
         Ok(HttpResponse::Ok().json(tweet))
-    }
-    else {
+    } else {
         Err(ApiError::new(401, "Unauthorized".to_string()))
     }
 }
@@ -52,12 +58,18 @@ async fn update(id: web::Path<Uuid>, user: web::Json<TweetMessage>, session: Ses
 async fn delete(id: web::Path<Uuid>, session: Session) -> Result<HttpResponse, ApiError> {
     let session_id: Option<Uuid> = session.get("user_id")?;
 
-
     if let Some(_) = session_id {
-        let num_deleted = Tweet::delete(id.into_inner())?;
+        // check for ownership
+        let user = User::find(session_id.unwrap())?;
+        let tweet = Tweet::find(id.into_inner())?;
+
+        if user.handle != tweet.handle {
+            Err(ApiError::new(401, "UnAuthorized".to_string()));
+        }
+
+        let num_deleted = tweet.delete_self();
         Ok(HttpResponse::Ok().json(json!({ "deleted": num_deleted })))
-    } 
-    else {
+    } else {
         Err(ApiError::new(401, "Unauthorized".to_string()))
     }
 }
@@ -69,4 +81,3 @@ pub fn init_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(update);
     cfg.service(delete);
 }
-

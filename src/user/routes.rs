@@ -17,7 +17,10 @@ async fn find(id: web::Path<Uuid>) -> Result<HttpResponse, ApiError> {
 }
 
 #[put("/users/{id}")]
-async fn update(id: web::Path<Uuid>, user: web::Json<UserMessage>) -> Result<HttpResponse, ApiError> {
+async fn update(
+    id: web::Path<Uuid>,
+    user: web::Json<UserMessage>,
+) -> Result<HttpResponse, ApiError> {
     let user = User::update(id.into_inner(), user.into_inner())?;
     Ok(HttpResponse::Ok().json(user))
 }
@@ -34,4 +37,3 @@ pub fn init_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(update);
     cfg.service(delete);
 }
-
